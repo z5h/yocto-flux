@@ -55,6 +55,7 @@ function StateHelper(state){
 
 /**
  * Uses React.addons.update (http://facebook.github.io/react/docs/update.html)
+ * to perform a non-desctructive update and notify stores of old/new state.
  */
 StateHelper.prototype.update = function(command){
 

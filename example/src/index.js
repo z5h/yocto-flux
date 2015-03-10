@@ -84,6 +84,7 @@ dispatcher.stores  = [usersStore, searchStore, statusStore];
 
 /**
  * Top level component.
+ * It is a Controller-View
  */
 var Root = React.createClass({
   mixins : [React.addons.PureRenderMixin],
@@ -119,6 +120,7 @@ var Root = React.createClass({
  * When the input changes, call our dispatcher with a "SEARCH_CHANGED" action.
  */
 var SearchField = React.createClass({
+  mixins : [React.addons.PureRenderMixin],
   change: function(e){
     this.props.dispatch('SEARCH_CHANGED', e.target.value);
   },
@@ -136,6 +138,7 @@ var SearchField = React.createClass({
  * Pretty basic stuff here.
  */
 var UsersView = React.createClass({
+  mixins : [React.addons.PureRenderMixin],
   render : function(){
     var users = (this.props.users || []).map(function(user){
       return <li key={user.id}>
@@ -151,11 +154,12 @@ var UsersView = React.createClass({
  * Pretty basic stuff here
  */
 var UserView = React.createClass({
+  mixins : [React.addons.PureRenderMixin],
   render : function(){
     var gitHubData = this.props.gitHubData;
     return <div>
-      {gitHubData.login}
       <img width="32" height="32" src={gitHubData.avatar_url}/>
+      {gitHubData.login}
     </div>;
   }
 });
