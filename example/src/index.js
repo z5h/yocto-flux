@@ -35,13 +35,21 @@ var searchStore = {
  * Also, for fun, dispatch "SEARCHING" and "DONE_SEARCHING" requests.
  */
 var usersStore = {
+
+  /**
+   * If the search value of the state changes, trigger a userSearch.
+   */
   onNewState : function(current, last){
     if (current.search !== last.search){
-      this.search(current.search);
+      this.userSearch(current.search);
     }
   },
 
-  search : function(query){
+  /**
+   * Make a user search request to github. Trigger "SEARCHING" "DONE_SEARCHING"
+   * actions appropriately.
+   */
+  userSearch : function(query){
     dispatcher.dispatch('SEARCHING');
 
     request
@@ -55,6 +63,11 @@ var usersStore = {
         }
       });
   },
+
+  /**
+   * If a serch result is returned, and it's query is the one we last asked for,
+   * then update the app state.
+   */
   SEARCH_RESULT : function(query, result){
     if (query === stateHelper.state.search){
       stateHelper.update({$merge : {users : result.body.items}})
@@ -68,10 +81,10 @@ var usersStore = {
  * Responds to search start/stop events.
  */
 var statusStore = {
-  SEARCHING :function(){
+  SEARCHING : function(){
     stateHelper.update({searching : {$apply: function(n){return n + 1}}});
   },
-  DONE_SEARCHING :function(){
+  DONE_SEARCHING : function(){
     stateHelper.update({searching : {$apply:  function(n){return n - 1}}});
   }
 };
@@ -83,11 +96,15 @@ stateHelper.stores = [usersStore, searchStore, statusStore];
 dispatcher.stores  = [usersStore, searchStore, statusStore];
 
 /**
+ * Make our dispatcher available in the console to drive with.
+ */
+window.dispatcher = dispatcher;
+
+/**
  * Top level component.
  * It is a Controller-View
  */
 var Root = React.createClass({
-  mixins : [React.addons.PureRenderMixin],
   /**
    * Here we create a callback that our dispatcher can trigger and force an
    * update.
@@ -120,7 +137,6 @@ var Root = React.createClass({
  * When the input changes, call our dispatcher with a "SEARCH_CHANGED" action.
  */
 var SearchField = React.createClass({
-  mixins : [React.addons.PureRenderMixin],
   change: function(e){
     this.props.dispatch('SEARCH_CHANGED', e.target.value);
   },
@@ -138,7 +154,6 @@ var SearchField = React.createClass({
  * Pretty basic stuff here.
  */
 var UsersView = React.createClass({
-  mixins : [React.addons.PureRenderMixin],
   render : function(){
     var users = (this.props.users || []).map(function(user){
       return <li key={user.id}>
@@ -154,12 +169,11 @@ var UsersView = React.createClass({
  * Pretty basic stuff here
  */
 var UserView = React.createClass({
-  mixins : [React.addons.PureRenderMixin],
   render : function(){
     var gitHubData = this.props.gitHubData;
     return <div>
       <img width="32" height="32" src={gitHubData.avatar_url}/>
-      {gitHubData.login}
+      <a href={gitHubData.html_url}>{gitHubData.login}</a>
     </div>;
   }
 });
@@ -171,8 +185,3 @@ React.render(
   <Root dispatcher={dispatcher} stateHelper={stateHelper}/>,
   document.getElementById('app')
 );
-
-/**
- * Make our dispatcher available in the console to drive with.
- */
-window.reactDispatcher = dispatcher;
